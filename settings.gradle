@@ -1,0 +1,6 @@
+rootProject.name = 'taleswiki'
+
+include('common')
+include('common:snowflake')
+include('service')
+include('service:dictionary')
