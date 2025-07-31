@@ -3,6 +3,7 @@ package openmpy.taleswiki.document.application;
 import lombok.RequiredArgsConstructor;
 import openmpy.taleswiki.common.snowflake.Snowflake;
 import openmpy.taleswiki.document.application.request.DocumentCreateRequest;
+import openmpy.taleswiki.document.application.request.DocumentUpdateRequest;
 import openmpy.taleswiki.document.application.response.DocumentResponse;
 import openmpy.taleswiki.document.domain.Document;
 import openmpy.taleswiki.document.domain.DocumentHistory;
@@ -29,6 +30,20 @@ public class DocumentService {
         final Document document = createDocument(request, category);
         final Document savedDocument = documentRepository.save(document);
         return DocumentResponse.from(savedDocument);
+    }
+
+    @Transactional
+    public DocumentResponse updateDocument(final Long id, final DocumentUpdateRequest request) {
+        final Document document = documentRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("찾을 수 없는 문서 번호입니다.")
+        );
+        final DocumentHistory documentHistory = DocumentHistory.create(
+                snowflake.nextId(), request.content(), request.author(), document
+        );
+
+        document.addHistory(documentHistory);
+        final Document savedDocument = documentRepository.save(document);
+        return DocumentResponse.from(savedDocument.getHistories().getLast());
     }
 
     private Document createDocument(final DocumentCreateRequest request, final String category) {

@@ -2,6 +2,7 @@ package openmpy.taleswiki.document.application.response;
 
 import java.time.LocalDateTime;
 import openmpy.taleswiki.document.domain.Document;
+import openmpy.taleswiki.document.domain.DocumentHistory;
 
 public record DocumentResponse(
         Long id,
@@ -20,6 +21,17 @@ public record DocumentResponse(
                 document.getHistories().size(),
                 document.getCreatedAt(),
                 document.getUpdatedAt()
+        );
+    }
+
+    public static DocumentResponse from(final DocumentHistory history) {
+        return new DocumentResponse(
+                history.getId(),
+                history.getDocument().getTitle(),
+                history.getDocument().getCategory().name(),
+                history.getVersion(),
+                history.getCreatedAt(),
+                history.getDocument().getUpdatedAt()
         );
     }
 }
