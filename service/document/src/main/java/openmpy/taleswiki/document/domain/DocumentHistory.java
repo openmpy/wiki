@@ -28,6 +28,9 @@ public class DocumentHistory {
     @Column
     private int version;
 
+    @Column
+    private boolean deleted;
+
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
@@ -42,8 +45,13 @@ public class DocumentHistory {
         history.content = content;
         history.author = author;
         history.version = document.getHistories().size() + 1;
+        history.deleted = false;
         history.createdAt = LocalDateTime.now();
         history.document = document;
         return history;
+    }
+
+    public void delete() {
+        this.deleted = true;
     }
 }

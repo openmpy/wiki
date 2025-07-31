@@ -8,6 +8,7 @@ import openmpy.taleswiki.document.application.response.DocumentResponse;
 import openmpy.taleswiki.document.domain.Document;
 import openmpy.taleswiki.document.domain.DocumentHistory;
 import openmpy.taleswiki.document.domain.constants.DocumentCategory;
+import openmpy.taleswiki.document.domain.repository.DocumentHistoryRepository;
 import openmpy.taleswiki.document.domain.repository.DocumentRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ public class DocumentService {
 
     private final Snowflake snowflake = new Snowflake();
     private final DocumentRepository documentRepository;
+    private final DocumentHistoryRepository documentHistoryRepository;
 
     @Transactional
     public DocumentResponse createDocument(final DocumentCreateRequest request) {
@@ -44,6 +46,27 @@ public class DocumentService {
         document.addHistory(documentHistory);
         final Document savedDocument = documentRepository.save(document);
         return DocumentResponse.from(savedDocument.getHistories().getLast());
+    }
+
+    @Transactional
+    public void deleteDocument(final Long id) {
+        final Document document = documentRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("찾을 수 없는 문서 번호입니다.")
+        );
+
+        documentRepository.delete(document);
+    }
+
+    @Transactional
+    public void deleteDocumentHistory(final Long id) {
+        final DocumentHistory documentHistory = documentHistoryRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("찾을 수 없는 문서 기록 번호입니다.")
+        );
+        if (documentHistory.isDeleted()) {
+            throw new IllegalArgumentException("이미 삭제 된 문서 기록입니다.");
+        }
+
+        documentHistory.delete();
     }
 
     private Document createDocument(final DocumentCreateRequest request, final String category) {

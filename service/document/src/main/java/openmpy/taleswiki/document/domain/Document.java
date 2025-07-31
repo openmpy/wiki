@@ -28,6 +28,7 @@ public class Document {
     private String title;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private DocumentCategory category;
 
     @Column(nullable = false)

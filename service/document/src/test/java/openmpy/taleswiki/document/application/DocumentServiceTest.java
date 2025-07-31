@@ -8,6 +8,7 @@ import openmpy.taleswiki.document.application.response.DocumentResponse;
 import openmpy.taleswiki.document.domain.Document;
 import openmpy.taleswiki.document.domain.DocumentHistory;
 import openmpy.taleswiki.document.domain.constants.DocumentCategory;
+import openmpy.taleswiki.document.domain.repository.DocumentHistoryRepository;
 import openmpy.taleswiki.document.domain.repository.DocumentRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,8 @@ class DocumentServiceTest {
 
     @Autowired
     private DocumentRepository documentRepository;
+    @Autowired
+    private DocumentHistoryRepository documentHistoryRepository;
 
     @DisplayName("[통과] 문서를 생성한다.")
     @Test
@@ -38,16 +41,12 @@ class DocumentServiceTest {
         assertThat(response.version()).isEqualTo(1);
         assertThat(response.createdAt()).isNotNull();
         assertThat(response.updatedAt()).isNotNull();
-
-        System.out.println("문서 = " + response);
     }
 
     @DisplayName("[통과] 문서를 수정한다.")
     @Test
     void document_service_test_02() {
-        final Document document = Document.create(1L, "제목", DocumentCategory.RUNNER);
-        final DocumentHistory documentHistory = DocumentHistory.create(1L, "내용", "작성자", document);
-        document.addHistory(documentHistory);
+        final Document document = getDocument();
         documentRepository.save(document);
 
         // given
@@ -62,5 +61,40 @@ class DocumentServiceTest {
         assertThat(response.version()).isEqualTo(2);
         assertThat(response.createdAt()).isNotNull();
         assertThat(response.updatedAt()).isNotNull();
+    }
+
+    @DisplayName("[통과] 문서를 삭제한다.")
+    @Test
+    void document_service_test_03() {
+        // given
+        documentRepository.save(getDocument());
+
+        // when
+        documentService.deleteDocument(1L);
+
+        // then
+        assertThat(documentRepository.findById(1L)).isEmpty();
+        assertThat(documentHistoryRepository.count()).isZero();
+    }
+
+    @DisplayName("[통과] 문서 기록을 삭제한다.")
+    @Test
+    void document_service_test_04() {
+        // given
+        documentRepository.save(getDocument());
+
+        // when
+        documentService.deleteDocumentHistory(1L);
+
+        // then
+        final DocumentHistory updatedHistory = documentHistoryRepository.findById(1L).orElseThrow();
+        assertThat(updatedHistory.isDeleted()).isTrue();
+    }
+
+    private static Document getDocument() {
+        final Document document = Document.create(1L, "제목", DocumentCategory.RUNNER);
+        final DocumentHistory documentHistory = DocumentHistory.create(1L, "내용", "작성자", document);
+        document.addHistory(documentHistory);
+        return document;
     }
 }
