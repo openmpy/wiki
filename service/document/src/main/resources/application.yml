@@ -3,10 +3,10 @@ server:
 
 spring:
   application:
-    name: openmpy-taleswiki-dictionary-service
+    name: openmpy-taleswiki-document-service
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/dictionary
+    url: jdbc:mysql://localhost:3306/document
     username: root
     password: root
   jpa:
