@@ -1,12 +1,12 @@
-package openmpy.taleswiki.document;
+package openmpy.taleswiki.view;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class DocumentApplication {
+public class ViewApplication {
 
     public static void main(final String[] args) {
-        SpringApplication.run(DocumentApplication.class, args);
+        SpringApplication.run(ViewApplication.class, args);
     }
 }
