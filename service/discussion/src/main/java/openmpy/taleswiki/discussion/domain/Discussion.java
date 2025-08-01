@@ -64,4 +64,8 @@ public class Discussion {
     public void update(final String content) {
         this.content = content;
     }
+
+    public boolean isRoot() {
+        return parentId == null;
+    }
 }

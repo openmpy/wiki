@@ -66,6 +66,26 @@ class DiscussionServiceTest {
         assertThat(response.parentId()).isNull();
     }
 
+    @DisplayName("[통과] 토론의 대댓글을 작성한다.")
+    @Test
+    void discussion_service_test_03() {
+        // given
+        final Discussion discussion = discussionRepository.save(getDiscussion());
+        final DiscussionCreateRequest request = new DiscussionCreateRequest("내용2", "작성자2", "1234", 1L);
+
+        // when
+        final DiscussionResponse response = discussionService.createDiscussion(discussion.getDocumentId(), request);
+
+        // then
+        assertThat(response.id()).isNotNull();
+        assertThat(response.content()).isEqualTo("내용2");
+        assertThat(response.author()).isEqualTo("작성자2");
+        assertThat(response.createdAt()).isNotNull();
+        assertThat(response.updatedAt()).isNotNull();
+        assertThat(response.documentId()).isEqualTo(1L);
+        assertThat(response.parentId()).isEqualTo(1L);
+    }
+
     private static Discussion getDiscussion() {
         return Discussion.create(1L, "내용", "작성자", "1234", 1L, null);
     }

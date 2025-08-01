@@ -19,13 +19,14 @@ public class DiscussionService {
 
     @Transactional
     public DiscussionResponse createDiscussion(final Long documentId, final DiscussionCreateRequest request) {
+        final Discussion parent = findParent(request.parentId());
         final Discussion discussion = Discussion.create(
                 snowflake.nextId(),
                 request.content(),
                 request.author(),
                 request.password(),
                 documentId,
-                request.parentId()
+                parent == null ? null : parent.getId()
         );
         final Discussion savedDiscussion = discussionRepository.save(discussion);
         return DiscussionResponse.from(savedDiscussion);
@@ -42,5 +43,15 @@ public class DiscussionService {
 
         discussion.update(request.content());
         return DiscussionResponse.from(discussion);
+    }
+
+    private Discussion findParent(final Long parentId) {
+        if (parentId == null) {
+            return null;
+        }
+
+        return discussionRepository.findByIdAndDeletedFalse(parentId)
+                .filter(Discussion::isRoot)
+                .orElseThrow(() -> new IllegalArgumentException("부모 토론 번호를 찾을 수 없습니다."));
     }
 }
