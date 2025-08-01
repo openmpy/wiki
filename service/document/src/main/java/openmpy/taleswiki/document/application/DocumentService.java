@@ -69,6 +69,17 @@ public class DocumentService {
         documentHistory.delete();
     }
 
+    @Transactional(readOnly = true)
+    public DocumentResponse readDocument(final Long id) {
+        final Document document = documentRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("찾을 수 없는 문서 번호입니다.")
+        );
+        final DocumentHistory documentHistory = documentHistoryRepository.findLatestNotDeletedByDocument(document)
+                .orElseThrow(() -> new IllegalArgumentException("문서 기록이 존재하지 않습니다."));
+
+        return DocumentResponse.from(documentHistory);
+    }
+
     private Document createDocument(final DocumentCreateRequest request, final String category) {
         final Document document = Document.create(
                 snowflake.nextId(), request.title(), DocumentCategory.valueOf(category)

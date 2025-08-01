@@ -10,6 +10,7 @@ import openmpy.taleswiki.document.domain.DocumentHistory;
 import openmpy.taleswiki.document.domain.constants.DocumentCategory;
 import openmpy.taleswiki.document.domain.repository.DocumentHistoryRepository;
 import openmpy.taleswiki.document.domain.repository.DocumentRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +24,14 @@ class DocumentServiceTest {
 
     @Autowired
     private DocumentRepository documentRepository;
+
     @Autowired
     private DocumentHistoryRepository documentHistoryRepository;
+
+    @BeforeEach
+    void setUp() {
+        documentRepository.deleteAll();
+    }
 
     @DisplayName("[통과] 문서를 생성한다.")
     @Test
@@ -38,6 +45,9 @@ class DocumentServiceTest {
         // then
         assertThat(response.id()).isNotNull();
         assertThat(response.title()).isEqualTo("제목");
+        assertThat(response.category()).isEqualTo("RUNNER");
+        assertThat(response.author()).isEqualTo("작성자");
+        assertThat(response.content()).isEqualTo("내용");
         assertThat(response.version()).isEqualTo(1);
         assertThat(response.createdAt()).isNotNull();
         assertThat(response.updatedAt()).isNotNull();
@@ -46,11 +56,9 @@ class DocumentServiceTest {
     @DisplayName("[통과] 문서를 수정한다.")
     @Test
     void document_service_test_02() {
-        final Document document = getDocument();
-        documentRepository.save(document);
-
         // given
         final DocumentUpdateRequest request = new DocumentUpdateRequest("수정 내용", "수정 작성자");
+        documentRepository.save(getDocument());
 
         // when
         final DocumentResponse response = documentService.updateDocument(1L, request);
@@ -58,6 +66,9 @@ class DocumentServiceTest {
         // then
         assertThat(response.id()).isNotNull();
         assertThat(response.title()).isEqualTo("제목");
+        assertThat(response.category()).isEqualTo("RUNNER");
+        assertThat(response.author()).isEqualTo("수정 작성자");
+        assertThat(response.content()).isEqualTo("수정 내용");
         assertThat(response.version()).isEqualTo(2);
         assertThat(response.createdAt()).isNotNull();
         assertThat(response.updatedAt()).isNotNull();
@@ -89,6 +100,26 @@ class DocumentServiceTest {
         // then
         final DocumentHistory updatedHistory = documentHistoryRepository.findById(1L).orElseThrow();
         assertThat(updatedHistory.isDeleted()).isTrue();
+    }
+
+    @DisplayName("[통과] 문서를 조회한다.")
+    @Test
+    void document_service_test_05() {
+        // given
+        documentRepository.save(getDocument());
+
+        // when
+        final DocumentResponse response = documentService.readDocument(1L);
+
+        // then
+        assertThat(response.id()).isNotNull();
+        assertThat(response.title()).isEqualTo("제목");
+        assertThat(response.category()).isEqualTo("RUNNER");
+        assertThat(response.author()).isEqualTo("작성자");
+        assertThat(response.content()).isEqualTo("내용");
+        assertThat(response.version()).isEqualTo(1);
+        assertThat(response.createdAt()).isNotNull();
+        assertThat(response.updatedAt()).isNotNull();
     }
 
     private static Document getDocument() {

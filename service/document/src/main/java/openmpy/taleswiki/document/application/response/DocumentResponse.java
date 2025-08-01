@@ -8,6 +8,8 @@ public record DocumentResponse(
         Long id,
         String title,
         String category,
+        String author,
+        String content,
         int version,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
@@ -18,6 +20,8 @@ public record DocumentResponse(
                 document.getId(),
                 document.getTitle(),
                 document.getCategory().name(),
+                document.getHistories().getLast().getAuthor(),
+                document.getHistories().getLast().getContent(),
                 document.getHistories().size(),
                 document.getCreatedAt(),
                 document.getUpdatedAt()
@@ -29,6 +33,8 @@ public record DocumentResponse(
                 history.getId(),
                 history.getDocument().getTitle(),
                 history.getDocument().getCategory().name(),
+                history.getAuthor(),
+                history.getContent(),
                 history.getVersion(),
                 history.getCreatedAt(),
                 history.getDocument().getUpdatedAt()
