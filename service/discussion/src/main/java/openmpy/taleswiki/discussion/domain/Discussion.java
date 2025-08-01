@@ -60,4 +60,8 @@ public class Discussion {
         discussion.parentId = parentId;
         return discussion;
     }
+
+    public void update(final String content) {
+        this.content = content;
+    }
 }
