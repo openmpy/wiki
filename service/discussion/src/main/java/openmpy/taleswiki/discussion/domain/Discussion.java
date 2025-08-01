@@ -68,4 +68,8 @@ public class Discussion {
     public boolean isRoot() {
         return parentId == null;
     }
+
+    public void delete() {
+        deleted = true;
+    }
 }

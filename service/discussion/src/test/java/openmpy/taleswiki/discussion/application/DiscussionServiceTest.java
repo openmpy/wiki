@@ -3,6 +3,7 @@ package openmpy.taleswiki.discussion.application;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import openmpy.taleswiki.discussion.application.request.DiscussionCreateRequest;
+import openmpy.taleswiki.discussion.application.request.DiscussionDeleteRequest;
 import openmpy.taleswiki.discussion.application.request.DiscussionUpdateRequest;
 import openmpy.taleswiki.discussion.application.response.DiscussionResponse;
 import openmpy.taleswiki.discussion.domain.Discussion;
@@ -84,6 +85,38 @@ class DiscussionServiceTest {
         assertThat(response.updatedAt()).isNotNull();
         assertThat(response.documentId()).isEqualTo(1L);
         assertThat(response.parentId()).isEqualTo(1L);
+    }
+
+    @DisplayName("[통과] 토론을 삭제한다.")
+    @Test
+    void discussion_service_test_04() {
+        // given
+        final DiscussionDeleteRequest request = new DiscussionDeleteRequest("1234");
+        discussionRepository.save(getDiscussion());
+
+        // when
+        discussionService.deleteDiscussion(1L, request);
+
+        // then
+        assertThat(discussionRepository.count()).isZero();
+    }
+
+    @DisplayName("[통과] 토론의 대댓글을 삭제한다.")
+    @Test
+    void discussion_service_test_05() {
+        // given
+        final DiscussionDeleteRequest request = new DiscussionDeleteRequest("1234");
+
+        discussionRepository.save(getDiscussion());
+
+        final Discussion discussion = Discussion.create(2L, "내용", "작성자", "1234", 1L, 1L);
+        discussionRepository.save(discussion);
+
+        // when
+        discussionService.deleteDiscussion(2L, request);
+
+        // then
+        assertThat(discussionRepository.count()).isEqualTo(1);
     }
 
     private static Discussion getDiscussion() {

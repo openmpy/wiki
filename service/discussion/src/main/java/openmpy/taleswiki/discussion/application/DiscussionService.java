@@ -3,6 +3,7 @@ package openmpy.taleswiki.discussion.application;
 import lombok.RequiredArgsConstructor;
 import openmpy.taleswiki.common.snowflake.Snowflake;
 import openmpy.taleswiki.discussion.application.request.DiscussionCreateRequest;
+import openmpy.taleswiki.discussion.application.request.DiscussionDeleteRequest;
 import openmpy.taleswiki.discussion.application.request.DiscussionUpdateRequest;
 import openmpy.taleswiki.discussion.application.response.DiscussionResponse;
 import openmpy.taleswiki.discussion.domain.Discussion;
@@ -45,6 +46,21 @@ public class DiscussionService {
         return DiscussionResponse.from(discussion);
     }
 
+    @Transactional
+    public void deleteDiscussion(final Long id, final DiscussionDeleteRequest request) {
+        discussionRepository.findById(id).ifPresent(discussion -> {
+            if (!discussion.getPassword().equals(request.password())) {
+                throw new IllegalArgumentException("토론 비밀번호가 올바르지 않습니다.");
+            }
+
+            if (hasChildren(discussion)) {
+                discussion.delete();
+                return;
+            }
+            discussionRepository.delete(discussion);
+        });
+    }
+
     private Discussion findParent(final Long parentId) {
         if (parentId == null) {
             return null;
@@ -53,5 +69,9 @@ public class DiscussionService {
         return discussionRepository.findByIdAndDeletedFalse(parentId)
                 .filter(Discussion::isRoot)
                 .orElseThrow(() -> new IllegalArgumentException("부모 토론 번호를 찾을 수 없습니다."));
+    }
+
+    private boolean hasChildren(final Discussion discussion) {
+        return discussionRepository.countByParentId(discussion.getId()) > 0;
     }
 }
