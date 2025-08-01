@@ -3,6 +3,7 @@ package openmpy.taleswiki.view.application;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import openmpy.taleswiki.view.application.response.DocumentViewResponse;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,12 @@ class DocumentViewCountServiceTest {
     @Autowired
     private StringRedisTemplate redisTemplate;
 
+    @BeforeEach
+    void setUp() {
+        redisTemplate.delete(String.format("view::document::%s::view_count", 1L));
+        redisTemplate.delete(String.format("view::document::%s::ip::%s::lock", 1L, "127.0.0.1"));
+    }
+
     @DisplayName("[통과] 문서 조회수를 DB에서 조회한다.")
     @Test
     void document_view_count_service_test_01() {
@@ -25,7 +32,7 @@ class DocumentViewCountServiceTest {
         redisTemplate.delete(String.format("view::document::%s::view_count", 1L));
 
         // when
-        final DocumentViewResponse response = documentViewCountService.read(1L);
+        final DocumentViewResponse response = documentViewCountService.count(1L);
 
         // then
         assertThat(response.views()).isZero();
@@ -38,7 +45,7 @@ class DocumentViewCountServiceTest {
         redisTemplate.opsForValue().set(String.format("view::document::%s::view_count", 1L), "10");
 
         // when
-        final DocumentViewResponse response = documentViewCountService.read(1L);
+        final DocumentViewResponse response = documentViewCountService.count(1L);
 
         // then
         assertThat(response.views()).isEqualTo(10);
@@ -52,7 +59,7 @@ class DocumentViewCountServiceTest {
         redisTemplate.opsForValue().set(key, "10");
 
         // when
-        documentViewCountService.increment(1L);
+        documentViewCountService.increment(1L, "127.0.0.1");
 
         // then
         assertThat(redisTemplate.opsForValue().get(key)).isEqualTo("11");
