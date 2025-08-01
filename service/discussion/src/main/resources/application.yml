@@ -1,12 +1,12 @@
 server:
-  port: 9000
+  port: 9001
 
 spring:
   application:
-    name: openmpy-taleswiki-document-service
+    name: openmpy-taleswiki-discussion-service
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/document
+    url: jdbc:mysql://localhost:3306/discussion
     username: root
     password: root
   jpa:

@@ -52,6 +52,6 @@ public class DocumentHistory {
     }
 
     public void delete() {
-        this.deleted = true;
+        deleted = true;
     }
 }
