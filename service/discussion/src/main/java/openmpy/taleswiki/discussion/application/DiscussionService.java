@@ -1,11 +1,13 @@
 package openmpy.taleswiki.discussion.application;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import openmpy.taleswiki.common.snowflake.Snowflake;
 import openmpy.taleswiki.discussion.application.request.DiscussionCreateRequest;
 import openmpy.taleswiki.discussion.application.request.DiscussionDeleteRequest;
 import openmpy.taleswiki.discussion.application.request.DiscussionUpdateRequest;
 import openmpy.taleswiki.discussion.application.response.DiscussionResponse;
+import openmpy.taleswiki.discussion.application.response.DiscussionsResponse;
 import openmpy.taleswiki.discussion.domain.Discussion;
 import openmpy.taleswiki.discussion.domain.repository.DiscussionRepository;
 import org.springframework.stereotype.Service;
@@ -59,6 +61,12 @@ public class DiscussionService {
             }
             discussionRepository.delete(discussion);
         });
+    }
+
+    @Transactional(readOnly = true)
+    public DiscussionsResponse readDiscussions(final Long documentId) {
+        final List<Discussion> discussions = discussionRepository.findByDocumentId(documentId);
+        return DiscussionsResponse.of(discussions);
     }
 
     private Discussion findParent(final Long parentId) {

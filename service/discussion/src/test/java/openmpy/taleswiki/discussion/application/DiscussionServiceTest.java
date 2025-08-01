@@ -2,10 +2,13 @@ package openmpy.taleswiki.discussion.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.ArrayList;
+import java.util.List;
 import openmpy.taleswiki.discussion.application.request.DiscussionCreateRequest;
 import openmpy.taleswiki.discussion.application.request.DiscussionDeleteRequest;
 import openmpy.taleswiki.discussion.application.request.DiscussionUpdateRequest;
 import openmpy.taleswiki.discussion.application.response.DiscussionResponse;
+import openmpy.taleswiki.discussion.application.response.DiscussionsResponse;
 import openmpy.taleswiki.discussion.domain.Discussion;
 import openmpy.taleswiki.discussion.domain.repository.DiscussionRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -119,7 +122,30 @@ class DiscussionServiceTest {
         assertThat(discussionRepository.count()).isEqualTo(1);
     }
 
+    @DisplayName("[통과] 문서 토론 목록을 조회한다.")
+    @Test
+    void discussion_service_test_06() {
+        // given
+        discussionRepository.saveAll(getDiscussions());
+
+        // when
+        final DiscussionsResponse response = discussionService.readDiscussions(1L);
+
+        // then
+        assertThat(response.discussions()).hasSize(10);
+    }
+
     private static Discussion getDiscussion() {
         return Discussion.create(1L, "내용", "작성자", "1234", 1L, null);
+    }
+
+    private static List<Discussion> getDiscussions() {
+        final List<Discussion> discussions = new ArrayList<>();
+
+        for (int i = 1; i <= 10; i++) {
+            final Discussion discussion = Discussion.create((long) i, "내용" + i, "작성자" + i, "1234", 1L, null);
+            discussions.add(discussion);
+        }
+        return discussions;
     }
 }
