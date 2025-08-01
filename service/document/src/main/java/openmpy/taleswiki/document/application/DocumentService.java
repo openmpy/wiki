@@ -1,10 +1,12 @@
 package openmpy.taleswiki.document.application;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import openmpy.taleswiki.common.snowflake.Snowflake;
 import openmpy.taleswiki.document.application.request.DocumentCreateRequest;
 import openmpy.taleswiki.document.application.request.DocumentUpdateRequest;
 import openmpy.taleswiki.document.application.response.DocumentResponse;
+import openmpy.taleswiki.document.application.response.DocumentsResponse;
 import openmpy.taleswiki.document.domain.Document;
 import openmpy.taleswiki.document.domain.DocumentHistory;
 import openmpy.taleswiki.document.domain.constants.DocumentCategory;
@@ -78,6 +80,14 @@ public class DocumentService {
                 .orElseThrow(() -> new IllegalArgumentException("문서 기록이 존재하지 않습니다."));
 
         return DocumentResponse.from(documentHistory);
+    }
+
+    @Transactional(readOnly = true)
+    public DocumentsResponse readDocuments(final String category) {
+        final List<Document> documents = documentRepository.findAllByCategory(
+                DocumentCategory.valueOf(category.toUpperCase())
+        );
+        return DocumentsResponse.of(documents);
     }
 
     private Document createDocument(final DocumentCreateRequest request, final String category) {

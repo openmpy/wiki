@@ -2,9 +2,12 @@ package openmpy.taleswiki.document.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.ArrayList;
+import java.util.List;
 import openmpy.taleswiki.document.application.request.DocumentCreateRequest;
 import openmpy.taleswiki.document.application.request.DocumentUpdateRequest;
 import openmpy.taleswiki.document.application.response.DocumentResponse;
+import openmpy.taleswiki.document.application.response.DocumentsResponse;
 import openmpy.taleswiki.document.domain.Document;
 import openmpy.taleswiki.document.domain.DocumentHistory;
 import openmpy.taleswiki.document.domain.constants.DocumentCategory;
@@ -122,10 +125,53 @@ class DocumentServiceTest {
         assertThat(response.updatedAt()).isNotNull();
     }
 
+    @DisplayName("[통과] 모든 문서를 조회한다.")
+    @Test
+    void document_service_test_06() {
+        // given
+        documentRepository.saveAll(getDocuments());
+
+        // when
+        final DocumentsResponse response = documentService.readDocuments("GUILD");
+
+        // then
+        final DocumentResponse first = response.documents().getFirst();
+
+        assertThat(first.id()).isNotNull();
+        assertThat(first.title()).isEqualTo("제목1");
+        assertThat(first.category()).isEqualTo("GUILD");
+        assertThat(first.author()).isEqualTo("작성자1");
+        assertThat(first.content()).isEqualTo("내용1");
+        assertThat(first.version()).isEqualTo(1);
+        assertThat(first.createdAt()).isNotNull();
+        assertThat(first.updatedAt()).isNotNull();
+        assertThat(response.documents()).hasSize(5);
+    }
+
     private static Document getDocument() {
         final Document document = Document.create(1L, "제목", DocumentCategory.RUNNER);
         final DocumentHistory documentHistory = DocumentHistory.create(1L, "내용", "작성자", document);
         document.addHistory(documentHistory);
         return document;
+    }
+
+    private static List<Document> getDocuments() {
+        final List<Document> documents = new ArrayList<>();
+
+        for (int i = 1; i <= 10; i++) {
+            final DocumentCategory category;
+
+            if (i % 2 == 0) {
+                category = DocumentCategory.RUNNER;
+            } else {
+                category = DocumentCategory.GUILD;
+            }
+
+            final Document document = Document.create((long) i, "제목" + i, category);
+            final DocumentHistory documentHistory = DocumentHistory.create((long) i, "내용" + i, "작성자" + i, document);
+            document.addHistory(documentHistory);
+            documents.add(document);
+        }
+        return documents;
     }
 }
