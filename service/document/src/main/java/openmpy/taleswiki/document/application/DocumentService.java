@@ -25,25 +25,25 @@ public class DocumentService {
     private final DocumentHistoryRepository documentHistoryRepository;
 
     @Transactional
-    public DocumentResponse createDocument(final DocumentCreateRequest request) {
+    public DocumentResponse createDocument(final DocumentCreateRequest request, final String clientIp) {
         final String category = request.category().toUpperCase();
 
         if (documentRepository.existsByTitleAndCategory(request.title(), DocumentCategory.valueOf(category))) {
             throw new CustomException("이미 작성된 문서입니다.");
         }
 
-        final Document document = createDocument(request, category);
+        final Document document = createDocument(request, category, clientIp);
         final Document savedDocument = documentRepository.save(document);
         return DocumentResponse.from(savedDocument);
     }
 
     @Transactional
-    public DocumentResponse updateDocument(final Long id, final DocumentUpdateRequest request) {
+    public DocumentResponse updateDocument(final Long id, final DocumentUpdateRequest request, final String clientIp) {
         final Document document = documentRepository.findById(id).orElseThrow(
                 () -> new CustomException("찾을 수 없는 문서 번호입니다.")
         );
         final DocumentHistory documentHistory = DocumentHistory.create(
-                snowflake.nextId(), request.content(), request.author(), document
+                snowflake.nextId(), request.content(), request.author(), clientIp, document
         );
 
         document.addHistory(documentHistory);
@@ -77,7 +77,8 @@ public class DocumentService {
         final Document document = documentRepository.findById(id).orElseThrow(
                 () -> new CustomException("찾을 수 없는 문서 번호입니다.")
         );
-        final DocumentHistory documentHistory = documentHistoryRepository.findLatestNotDeletedByDocument(document)
+        final DocumentHistory documentHistory = documentHistoryRepository
+                .findFirstByDocumentAndDeletedFalseOrderByVersionDesc(document)
                 .orElseThrow(() -> new CustomException("문서 기록이 존재하지 않습니다."));
 
         return DocumentResponse.from(documentHistory);
@@ -91,12 +92,12 @@ public class DocumentService {
         return DocumentsResponse.of(documents);
     }
 
-    private Document createDocument(final DocumentCreateRequest request, final String category) {
+    private Document createDocument(final DocumentCreateRequest request, final String category, final String clientIp) {
         final Document document = Document.create(
                 snowflake.nextId(), request.title(), DocumentCategory.valueOf(category)
         );
         final DocumentHistory documentHistory = DocumentHistory.create(
-                snowflake.nextId(), request.content(), request.author(), document
+                snowflake.nextId(), request.content(), request.author(), clientIp, document
         );
 
         document.addHistory(documentHistory);

@@ -25,6 +25,9 @@ public class DocumentHistory {
     @Column(nullable = false)
     private String author;
 
+    @Column(nullable = false)
+    private String clientIp;
+
     @Column
     private int version;
 
@@ -38,12 +41,13 @@ public class DocumentHistory {
     private Document document;
 
     public static DocumentHistory create(
-            final Long id, final String content, final String author, final Document document
+            final Long id, final String content, final String author, final String clientIp, final Document document
     ) {
         final DocumentHistory history = new DocumentHistory();
         history.id = id;
         history.content = content;
         history.author = author;
+        history.clientIp = clientIp;
         history.version = document.getHistories().size() + 1;
         history.deleted = false;
         history.createdAt = LocalDateTime.now();

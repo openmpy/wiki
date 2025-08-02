@@ -5,7 +5,8 @@ import openmpy.taleswiki.document.domain.Document;
 import openmpy.taleswiki.document.domain.DocumentHistory;
 
 public record DocumentResponse(
-        Long id,
+        Long documentId,
+        Long documentHistoryId,
         String title,
         String category,
         String author,
@@ -16,12 +17,15 @@ public record DocumentResponse(
 ) {
 
     public static DocumentResponse from(final Document document) {
+        final DocumentHistory history = document.getHistories().getLast();
+
         return new DocumentResponse(
                 document.getId(),
+                history.getId(),
                 document.getTitle(),
                 document.getCategory().name(),
-                document.getHistories().getLast().getAuthor(),
-                document.getHistories().getLast().getContent(),
+                history.isDeleted() ? null : history.getAuthor(),
+                history.isDeleted() ? null : history.getContent(),
                 document.getHistories().size(),
                 document.getCreatedAt(),
                 document.getUpdatedAt()
@@ -30,11 +34,12 @@ public record DocumentResponse(
 
     public static DocumentResponse from(final DocumentHistory history) {
         return new DocumentResponse(
+                history.getDocument().getId(),
                 history.getId(),
                 history.getDocument().getTitle(),
                 history.getDocument().getCategory().name(),
-                history.getAuthor(),
-                history.getContent(),
+                history.isDeleted() ? null : history.getAuthor(),
+                history.isDeleted() ? null : history.getContent(),
                 history.getVersion(),
                 history.getCreatedAt(),
                 history.getDocument().getUpdatedAt()

@@ -43,7 +43,7 @@ class DocumentServiceTest {
         final DocumentCreateRequest request = new DocumentCreateRequest("제목", "내용", "작성자", "RUNNER");
 
         // when
-        final DocumentResponse response = documentService.createDocument(request);
+        final DocumentResponse response = documentService.createDocument(request, "127.0.0.1");
 
         // then
         assertThat(response.id()).isNotNull();
@@ -64,7 +64,7 @@ class DocumentServiceTest {
         documentRepository.save(getDocument());
 
         // when
-        final DocumentResponse response = documentService.updateDocument(1L, request);
+        final DocumentResponse response = documentService.updateDocument(1L, request, "127.0.0.1");
 
         // then
         assertThat(response.id()).isNotNull();
@@ -150,7 +150,9 @@ class DocumentServiceTest {
 
     private static Document getDocument() {
         final Document document = Document.create(1L, "제목", DocumentCategory.RUNNER);
-        final DocumentHistory documentHistory = DocumentHistory.create(1L, "내용", "작성자", document);
+        final DocumentHistory documentHistory = DocumentHistory.create(
+                1L, "내용", "작성자", "127.0.0.1", document
+        );
         document.addHistory(documentHistory);
         return document;
     }
@@ -168,7 +170,9 @@ class DocumentServiceTest {
             }
 
             final Document document = Document.create((long) i, "제목" + i, category);
-            final DocumentHistory documentHistory = DocumentHistory.create((long) i, "내용" + i, "작성자" + i, document);
+            final DocumentHistory documentHistory = DocumentHistory.create(
+                    (long) i, "내용" + i, "작성자" + i, "127.0.0.1", document
+            );
             document.addHistory(documentHistory);
             documents.add(document);
         }
