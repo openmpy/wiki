@@ -35,7 +35,7 @@ public class DocumentViewBackupProcessor {
                         documentViewCount.updateView(viewCount)
                 );
             } catch (final Exception e) {
-                log.warn("조회수 반영 실패 - key: {}, error: {}", key, e.getMessage());
+                log.error("조회수 반영 실패 - key: {}, error: {}", key, e.getMessage());
             }
         });
     }

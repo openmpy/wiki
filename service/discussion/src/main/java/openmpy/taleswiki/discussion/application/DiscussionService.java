@@ -2,6 +2,7 @@ package openmpy.taleswiki.discussion.application;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import openmpy.taleswiki.common.exception.CustomException;
 import openmpy.taleswiki.common.snowflake.Snowflake;
 import openmpy.taleswiki.discussion.application.request.DiscussionCreateRequest;
 import openmpy.taleswiki.discussion.application.request.DiscussionDeleteRequest;
@@ -38,10 +39,10 @@ public class DiscussionService {
     @Transactional
     public DiscussionResponse updateDiscussion(final Long id, final DiscussionUpdateRequest request) {
         final Discussion discussion = discussionRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("찾을 수 없는 토론 번호입니다.")
+                () -> new CustomException("찾을 수 없는 토론 번호입니다.")
         );
         if (!discussion.getPassword().equals(request.password())) {
-            throw new IllegalArgumentException("토론 비밀번호가 올바르지 않습니다.");
+            throw new CustomException("토론 비밀번호가 올바르지 않습니다.");
         }
 
         discussion.update(request.content());
@@ -52,7 +53,7 @@ public class DiscussionService {
     public void deleteDiscussion(final Long id, final DiscussionDeleteRequest request) {
         discussionRepository.findById(id).ifPresent(discussion -> {
             if (!discussion.getPassword().equals(request.password())) {
-                throw new IllegalArgumentException("토론 비밀번호가 올바르지 않습니다.");
+                throw new CustomException("토론 비밀번호가 올바르지 않습니다.");
             }
 
             if (hasChildren(discussion)) {
@@ -76,7 +77,7 @@ public class DiscussionService {
 
         return discussionRepository.findByIdAndDeletedFalse(parentId)
                 .filter(Discussion::isRoot)
-                .orElseThrow(() -> new IllegalArgumentException("부모 토론 번호를 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException("부모 토론 번호를 찾을 수 없습니다."));
     }
 
     private boolean hasChildren(final Discussion discussion) {

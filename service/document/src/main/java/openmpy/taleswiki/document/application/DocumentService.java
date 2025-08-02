@@ -2,6 +2,7 @@ package openmpy.taleswiki.document.application;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import openmpy.taleswiki.common.exception.CustomException;
 import openmpy.taleswiki.common.snowflake.Snowflake;
 import openmpy.taleswiki.document.application.request.DocumentCreateRequest;
 import openmpy.taleswiki.document.application.request.DocumentUpdateRequest;
@@ -28,7 +29,7 @@ public class DocumentService {
         final String category = request.category().toUpperCase();
 
         if (documentRepository.existsByTitleAndCategory(request.title(), DocumentCategory.valueOf(category))) {
-            throw new IllegalArgumentException("이미 작성된 문서입니다.");
+            throw new CustomException("이미 작성된 문서입니다.");
         }
 
         final Document document = createDocument(request, category);
@@ -39,7 +40,7 @@ public class DocumentService {
     @Transactional
     public DocumentResponse updateDocument(final Long id, final DocumentUpdateRequest request) {
         final Document document = documentRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("찾을 수 없는 문서 번호입니다.")
+                () -> new CustomException("찾을 수 없는 문서 번호입니다.")
         );
         final DocumentHistory documentHistory = DocumentHistory.create(
                 snowflake.nextId(), request.content(), request.author(), document
@@ -53,7 +54,7 @@ public class DocumentService {
     @Transactional
     public void deleteDocument(final Long id) {
         final Document document = documentRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("찾을 수 없는 문서 번호입니다.")
+                () -> new CustomException("찾을 수 없는 문서 번호입니다.")
         );
 
         documentRepository.delete(document);
@@ -62,10 +63,10 @@ public class DocumentService {
     @Transactional
     public void deleteDocumentHistory(final Long id) {
         final DocumentHistory documentHistory = documentHistoryRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("찾을 수 없는 문서 기록 번호입니다.")
+                () -> new CustomException("찾을 수 없는 문서 기록 번호입니다.")
         );
         if (documentHistory.isDeleted()) {
-            throw new IllegalArgumentException("이미 삭제 된 문서 기록입니다.");
+            throw new CustomException("이미 삭제 된 문서 기록입니다.");
         }
 
         documentHistory.delete();
@@ -74,10 +75,10 @@ public class DocumentService {
     @Transactional(readOnly = true)
     public DocumentResponse readDocument(final Long id) {
         final Document document = documentRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("찾을 수 없는 문서 번호입니다.")
+                () -> new CustomException("찾을 수 없는 문서 번호입니다.")
         );
         final DocumentHistory documentHistory = documentHistoryRepository.findLatestNotDeletedByDocument(document)
-                .orElseThrow(() -> new IllegalArgumentException("문서 기록이 존재하지 않습니다."));
+                .orElseThrow(() -> new CustomException("문서 기록이 존재하지 않습니다."));
 
         return DocumentResponse.from(documentHistory);
     }
