@@ -26,9 +26,8 @@ public class DocumentService {
 
     @Transactional
     public DocumentResponse createDocument(final DocumentCreateRequest request, final String clientIp) {
-        final String category = request.category().toUpperCase();
-
-        if (documentRepository.existsByTitleAndCategory(request.title(), DocumentCategory.valueOf(category))) {
+        final String category = request.category();
+        if (documentRepository.existsByTitleAndCategory(request.title(), DocumentCategory.from(category))) {
             throw new CustomException("이미 작성된 문서입니다.");
         }
 
@@ -87,14 +86,14 @@ public class DocumentService {
     @Transactional(readOnly = true)
     public DocumentsResponse readDocuments(final String category) {
         final List<Document> documents = documentRepository.findAllByCategory(
-                DocumentCategory.valueOf(category.toUpperCase())
+                DocumentCategory.from(category.toUpperCase())
         );
         return DocumentsResponse.of(documents);
     }
 
     private Document createDocument(final DocumentCreateRequest request, final String category, final String clientIp) {
         final Document document = Document.create(
-                snowflake.nextId(), request.title(), DocumentCategory.valueOf(category)
+                snowflake.nextId(), request.title(), DocumentCategory.from(category)
         );
         final DocumentHistory documentHistory = DocumentHistory.create(
                 snowflake.nextId(), request.content(), request.author(), clientIp, document
