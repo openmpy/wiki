@@ -1,0 +1,35 @@
+### 문서 작성
+POST http://localhost:9000/api/v1/documents
+Content-Type: application/json
+
+{
+  "title": "제목",
+  "content": "내용",
+  "author": "작성자",
+  "category": "RUNNER"
+}
+
+### 문서 수정
+PUT http://localhost:9000/api/v1/documents/209859860091252736
+Content-Type: application/json
+
+{
+  "content": "수정 내용",
+  "author": "수정 작성자"
+}
+
+### 문서 삭제
+DELETE http://localhost:9000/api/v1/documents/209855290010628096
+Content-Type: application/json
+
+### 문서 기록 삭제
+DELETE http://localhost:9000/api/v1/documents/histories/209859905490399232
+Content-Type: application/json
+
+### 문서 조회
+GET http://localhost:9000/api/v1/documents/209859860091252736
+Content-Type: application/json
+
+### 문서 카테고리별 조회
+GET http://localhost:9000/api/v1/documents/category/runner
+Content-Type: application/json
